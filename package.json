@@ -1,0 +1,42 @@
+{
+  "name": "getwhiteip-yandex",
+  "version": "1.0.0",
+  "description": "Мониторинг IP-адресов 51.250.* в зоне ru-central1-a через Yandex Cloud API",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "hunt": "node src/index.js --hunt",
+    "slow": "node src/index.js --slow",
+    "direct": "node src/index.js --direct",
+    "dev": "nodemon src/index.js",
+    "scan": "node src/index.js"
+  },
+  "keywords": [
+    "yandex-cloud",
+    "compute",
+    "ip-monitor",
+    "ru-central1-a"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@yandex-cloud/nodejs-sdk": "^2.9.1",
+    "chalk": "^5.3.0",
+    "cli-table3": "^0.6.5",
+    "dotenv": "^16.4.5",
+    "dotenv-expand": "^11.0.6",
+    "figlet": "^1.8.0",
+    "ora": "^8.1.1",
+    "boxen": "^8.0.1",
+    "dayjs": "^1.11.13",
+    "zod": "^3.23.8",
+    "consola": "^3.2.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.7"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

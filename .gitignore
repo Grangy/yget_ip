@@ -1,0 +1,13 @@
+node_modules/
+.env
+.env.local
+.env.*.local
+*.log
+sa-key.json
+authorized_key.json
+*-key.json
+*.pem
+.DS_Store
+.idea/
+.vscode/
+*.swp
