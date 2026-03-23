@@ -49,7 +49,7 @@ function printBanner() {
   const art = figlet.textSync('GetWhiteIP', { font: 'Small' });
   console.log(chalk.cyan(art));
   console.log(
-    chalk.gray('  Yandex Cloud • Публичные IP • ') + chalk.yellow(IP_PREFIXES.join(', ')) + chalk.gray(' • ru-central1-{a,b,d,e}\n')
+    chalk.gray('  Y☁C • Публичные IP • ') + chalk.yellow(IP_PREFIXES.join(', ')) + chalk.gray(' • ru-central1-{a,b,d,e}\n')
   );
 }
 
@@ -333,7 +333,7 @@ async function main() {
       return;
     }
 
-    const spinner = ora({ text: chalk.cyan('Запрос к Yandex Cloud API...'), color: 'cyan' }).start();
+    const spinner = ora({ text: chalk.cyan('Запрос к API...'), color: 'cyan' }).start();
     const addresses = await fetchPublicAddresses(session, config.YC_FOLDER_ID);
     spinner.succeed(chalk.green(`Загружено публичных IP: ${addresses.length}`));
 

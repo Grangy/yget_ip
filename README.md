@@ -1,6 +1,6 @@
-# GetWhiteIP — Yandex Cloud IP Hunter
+# GetWhiteIP — Y☁C IP Hunter
 
-Автоматический поиск публичных IP адресов **51.250.*** и **158.160.*** в Yandex Cloud. Создаёт IP в указанных зонах, проверяет префикс, оставляет нужные — удаляет остальные.
+Автоматический поиск публичных IP адресов **51.250.*** и **158.160.*** в Y☁C. Создаёт IP в указанных зонах, проверяет префикс, оставляет нужные — удаляет остальные.
 
 ## Быстрый старт
 
@@ -29,7 +29,7 @@ npm run slow
 
 | Переменная | Обязательно | Описание |
 |------------|-------------|----------|
-| `YC_FOLDER_ID` | Да | ID каталога Yandex Cloud |
+| `YC_FOLDER_ID` | Да | ID каталога Y☁C |
 | `YC_IAM_TOKEN` | Или | Токен от `yc iam create-token` |
 | `YC_SERVICE_ACCOUNT_KEY_FILE` | Или | Путь к JSON авторизованного ключа |
 | `YC_OAUTH_TOKEN` | Или | OAuth-токен |
@@ -56,7 +56,7 @@ yc iam create-token
 
 ### Вариант 2: Авторизованный ключ (рекомендуется для CI)
 
-1. Консоль Yandex Cloud → **IAM** → **Сервисные аккаунты**
+1. Консоль Y☁C → **IAM** → **Сервисные аккаунты**
 2. Выберите SA с ролью `vpc.admin` или `editor`
 3. **Создать авторизованный ключ** → Скачать JSON
 4. Сохранить как `authorized_key.json` в корне проекта
@@ -82,9 +82,9 @@ yc iam create-token
 ## Требования
 
 - Node.js >= 18
-- Yandex Cloud каталог с сервисным аккаунтом
+- Y☁C каталог с сервисным аккаунтом
 
 ## Ссылки
 
-- [Yandex Cloud VPC — публичные адреса](https://yandex.cloud/ru/docs/vpc/concepts/address)
+- [Y☁C VPC — публичные адреса](https://yandex.cloud/ru/docs/vpc/concepts/address)
 - [IAM — авторизованный ключ](https://cloud.yandex.com/en/docs/iam/operations/iam-token/create-for-sa)
