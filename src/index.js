@@ -23,9 +23,14 @@ const HUNT = process.argv.includes('--hunt') || process.argv.includes('-h');
 const SLOW = process.argv.includes('--slow') || process.argv.includes('-s');
 const DIRECT = process.argv.includes('--direct') || process.argv.includes('-d');
 
-const SLOW_ZONES = ['ru-central1-a', 'ru-central1-b'];
-const SLOW_BATCH = 5;
-const SLOW_INTERVAL_MS = 60 * 1000;
+const SLOW_ZONES = process.env.SLOW_ZONES
+  ? process.env.SLOW_ZONES.split(',').map((z) => z.trim())
+  : ['ru-central1-a', 'ru-central1-b'];
+const SLOW_BATCH = parseInt(process.env.SLOW_BATCH || '5', 10);
+const SLOW_INTERVAL_MS = parseInt(process.env.SLOW_INTERVAL_MS || String(60 * 1000), 10);
+const ENABLE_DDOS_PROTECTION = (process.env.ENABLE_DDOS_PROTECTION || 'false').toLowerCase() === 'true';
+const DDOS_PROTECTION_PROVIDER = process.env.DDOS_PROTECTION_PROVIDER || 'qrator';
+const SLOW_PREFLIGHT = (process.env.SLOW_PREFLIGHT || 'true').toLowerCase() === 'true';
 
 const BATCH_SIZE = parseInt(process.env.BATCH_SIZE || process.argv.find((a) => a.startsWith('--batch='))?.split('=')[1] || '15', 10) || 15;
 
@@ -102,6 +107,9 @@ async function createAndResolve(client, session, folderId, name, zoneIdOrAddress
   const spec = zoneIdOrAddress.includes('.')
     ? { address: zoneIdOrAddress }
     : { zoneId: zoneIdOrAddress };
+  if (ENABLE_DDOS_PROTECTION) {
+    spec.requirements = { ddosProtectionProvider: DDOS_PROTECTION_PROVIDER };
+  }
   const op = await client.create(
     CreateAddressRequest.fromPartial({
       folderId,
@@ -128,6 +136,17 @@ async function createAndResolve(client, session, folderId, name, zoneIdOrAddress
 async function deleteAddress(client, session, addressId) {
   const delOp = await client.delete(DeleteAddressRequest.fromPartial({ addressId }));
   if (delOp?.id) await waitForOperation(delOp, session, 15000).catch(() => {});
+}
+
+async function runSingleCreateProbe(client, session, folderId, zoneId) {
+  const probeName = `whiteip-probe-${Date.now()}`;
+  const probe = await createAndResolve(client, session, folderId, probeName, zoneId);
+  const ext = probe.externalIpv4Address || probe.external_ipv4_address;
+  const ip = ext?.address || '?';
+  const zone = ext?.zoneId || ext?.zone_id || '?';
+  const provider = ext?.requirements?.ddosProtectionProvider || '-';
+  console.log(chalk.green(`  Probe OK: ${ip} (${zone}) DDoS=${provider}`));
+  await deleteAddress(client, session, probe.id).catch(() => {});
 }
 
 async function huntWhiteIp(session, folderId) {
@@ -199,19 +218,35 @@ async function huntSlowIp(session, folderId) {
   const client = session.client(serviceClients.AddressServiceClient);
   let batchNum = 0;
 
-  console.log(chalk.yellow(`  Режим --slow: зоны a+b, по ${SLOW_BATCH} IP, пауза ${SLOW_INTERVAL_MS / 1000} сек между батчами\n`));
+  const zonesLabel = SLOW_ZONES.map((z) => z.slice(-1)).join(',');
+  const ddosLabel = ENABLE_DDOS_PROTECTION
+    ? `, DDoS: on (${DDOS_PROTECTION_PROVIDER})`
+    : ', DDoS: off';
+  console.log(chalk.yellow(`  Режим --slow: зоны ${zonesLabel}, по ${SLOW_BATCH} IP, пауза ${SLOW_INTERVAL_MS / 1000} сек${ddosLabel}\n`));
+
+  if (SLOW_PREFLIGHT && SLOW_ZONES.length > 0) {
+    const preflightZone = SLOW_ZONES[0];
+    process.stdout.write(chalk.gray(`  Preflight: create+delete в ${preflightZone}... `));
+    try {
+      await runSingleCreateProbe(client, session, folderId, preflightZone);
+    } catch (e) {
+      console.log(chalk.red(`  Preflight fail: ${e.message}`));
+    }
+    console.log('');
+  }
 
   while (true) {
     batchNum++;
     const base = Date.now();
     const tasks = [];
+    const shift = (batchNum - 1) % SLOW_ZONES.length;
     for (let i = 0; i < SLOW_BATCH; i++) {
-      const zone = SLOW_ZONES[i % SLOW_ZONES.length];
+      const zone = SLOW_ZONES[(i + shift) % SLOW_ZONES.length];
       tasks.push({ name: `whiteip-${base}-${i}`, zoneIdOrAddress: zone });
     }
 
     try {
-      process.stdout.write(chalk.gray(`  [${dayjs().format('HH:mm:ss')}] Батч ${batchNum}: создаю ${SLOW_BATCH} (a,b)... `));
+      process.stdout.write(chalk.gray(`  [${dayjs().format('HH:mm:ss')}] Батч ${batchNum}: создаю ${SLOW_BATCH} (${zonesLabel})... `));
 
       const results = await Promise.allSettled(
         tasks.map(async ({ name, zoneIdOrAddress }, i) => {
@@ -219,6 +254,12 @@ async function huntSlowIp(session, folderId) {
           return createAndResolve(client, session, folderId, name, zoneIdOrAddress);
         })
       );
+
+      const failed = results
+        .map((r, i) => (r.status === 'rejected'
+          ? { zone: tasks[i].zoneIdOrAddress, error: r.reason?.message || String(r.reason) }
+          : null))
+        .filter(Boolean);
 
       const addresses = results
         .map((r) => (r.status === 'fulfilled' ? r.value : null))
@@ -236,6 +277,16 @@ async function huntSlowIp(session, folderId) {
         return `${ip}(${z.slice(-1)})`;
       }).join(', ');
       console.log(chalk.cyan(ipsWithZone));
+
+      if (failed.length > 0) {
+        const failSummary = failed
+          .map((f) => {
+            const shortErr = f.error.split('\n')[0];
+            return `${f.zone.slice(-1)}:${shortErr}`;
+          })
+          .join(' | ');
+        console.log(chalk.red(`  create failed (${failed.length}/${SLOW_BATCH}): ${failSummary}`));
+      }
 
       if (winner) {
         const ext = winner.externalIpv4Address || winner.external_ipv4_address;

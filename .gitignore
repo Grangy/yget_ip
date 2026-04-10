@@ -5,6 +5,8 @@ node_modules/
 *.log
 sa-key.json
 authorized_key.json
+authorized_key*.json
+*authorized_key*.json
 *-key.json
 *.pem
 .DS_Store

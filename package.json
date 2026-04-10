@@ -1,6 +1,6 @@
 {
   "name": "getwhiteip-yandex",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Мониторинг IP-адресов 51.250.* и 158.160.* в Y☁C",
   "main": "src/index.js",
   "type": "module",
