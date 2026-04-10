@@ -1,10 +1,10 @@
 <div align="center">
 
-# GetWhiteIP — охотник за «белыми» публичными IP в Yandex Cloud
+# GetWhiteIP — охотник за «белыми» публичными IP в Y☁C
 
 [![Node.js](https://img.shields.io/badge/Node.js-%E2%89%A518-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
 [![npm](https://img.shields.io/badge/npm-scripts-CB3837?style=for-the-badge&logo=npm&logoColor=white)](https://www.npmjs.com/)
-[![Yandex Cloud](https://img.shields.io/badge/Y%E2%98%81C-VPC%20%E2%80%A2%20Address%20API-5282FF?style=for-the-badge)](https://yandex.cloud/ru/docs/vpc/concepts/address)
+[![Y☁C — VPC](https://img.shields.io/badge/Y%E2%98%81C-VPC%20%E2%80%A2%20Address%20API-5282FF?style=for-the-badge)](https://yandex.cloud/ru/docs/vpc/concepts/address)
 [![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
 <img src="https://skillicons.dev/icons?i=nodejs,npm" height="32" alt="Node.js, npm" />
@@ -17,7 +17,7 @@
 
 ## Аннотация
 
-Утилита для **поиска публичных статических IPv4** в каталоге Yandex Cloud с заданными префиксами (например `51.250.` и `158.160.`). Через **AddressService** создаёт адреса в выбранных зонах `ru-central1-*`, сравнивает выданный IP с префиксами, при совпадении оставляет ресурс, иначе удаляет. Поддержаны режимы **быстрого перебора** (`hunt`), **медленного** с паузами и ротацией зон (`slow`), опционально **DDoS protection** в спецификации адреса (`requirements.ddosProtectionProvider`), **preflight** create/delete перед циклом и экспериментальный `--direct`.
+Утилита для **поиска публичных статических IPv4** в каталоге Y☁C с заданными префиксами (например `51.250.` и `158.160.`). Через **AddressService** создаёт адреса в выбранных зонах `ru-central1-*`, сравнивает выданный IP с префиксами, при совпадении оставляет ресурс, иначе удаляет. Поддержаны режимы **быстрого перебора** (`hunt`), **медленного** с паузами и ротацией зон (`slow`), опционально **DDoS protection** в спецификации адреса (`requirements.ddosProtectionProvider`), **preflight** create/delete перед циклом и экспериментальный `--direct`.
 
 > **Безопасность:** не публикуйте IAM-токены, OAuth и JSON ключи сервисного аккаунта. Храните их в `.env` (в репозиторий не коммитится) или в переменных окружения CI. В примерах ниже вместо секретов — плейсхолдеры.
 
@@ -169,7 +169,7 @@ yc iam create-token
 
 ### Авторизованный ключ (удобно для скриптов и CI)
 
-1. Консоль Yandex Cloud → **IAM** → **Сервисные аккаунты**
+1. Консоль Y☁C → **IAM** → **Сервисные аккаунты**
 2. SA с ролью `vpc.admin` или `editor` (по политике вашей организации)
 3. **Создать авторизованный ключ** → скачать JSON
 4. Файл **не коммитить**; в `.env`: `YC_SERVICE_ACCOUNT_KEY_FILE=authorized_key.json`
@@ -205,9 +205,9 @@ yc iam create-token
 
 ## Ссылки
 
-- [Публичные IP в VPC](https://yandex.cloud/ru/docs/vpc/concepts/address)
-- [Создание IAM-токена для SA](https://cloud.yandex.com/en/docs/iam/operations/iam-token/create-for-sa)
-- [REST: создание адреса (поля `requirements`)](https://github.com/yandex-cloud/docs/blob/master/en/vpc/api-ref/Address/create.md)
+- [Документация: публичный адрес в VPC](https://yandex.cloud/ru/docs/vpc/concepts/address)
+- [Документация: IAM-токен для сервисного аккаунта](https://cloud.yandex.com/en/docs/iam/operations/iam-token/create-for-sa)
+- [Спецификация REST: Address.Create, поле `requirements`](https://github.com/yandex-cloud/docs/blob/master/en/vpc/api-ref/Address/create.md)
 
 ---
 
